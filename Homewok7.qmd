@@ -12,6 +12,8 @@ The following r chunk includes the packages we will use for homework assignment
 ```{r}
 library(ISLR2)
 library(car)
+library(boot)
+library(glmnet)
 ```
 
 ## College Applications
@@ -51,3 +53,78 @@ vif_values
 ```
 
 Several of the coefficients, such as Apps, Accept, Enroll, and PHD seem to have high colliniarity
+
+Part B
+
+```{r}
+
+#Respective models
+
+model1 <- glm(Apps ~ Private + Accept + Top10perc + Top25perc +
+               F.Undergrad + Outstate + Room.Board + PhD +
+               perc.alumni + Expend + Grad.Rate,
+              data = college.data, family = gaussian)
+
+
+model2 <- glm(Apps ~ Private + Accept + Top10perc + Top25perc +
+               Outstate + Room.Board + PhD + Expend,
+             data = college.data, family = gaussian)
+
+
+
+AIC(model1, model2)
+BIC(model1, model2)
+
+#Respectiv CV
+
+
+cv1 <- cv.glm(college.data, model1, K = 10)
+cv2 <- cv.glm(college.data, model2, K = 10)
+
+
+cv1$delta[1]
+cv2$delta[1]
+
+
+
+```
+
+As we expected (Though it was explained in the homework sheet) Model 1 is the lowest for AIC, while model 2 is lowest for the BIC. With the 10 fold cross validation attempt, model 2 has the lowest predicted MSE
+
+Part C
+
+```{r}
+
+x <- model.matrix(Apps ~ ., data = college.data)[, -1] 
+
+y <- college.data$Apps  
+
+cv.ridge <- cv.glmnet(x, y, alpha = 0)
+
+
+best.lambda <- cv.ridge$lambda.min
+best.lambda
+
+plot(cv.ridge)
+
+
+mse.ridge <- min(cv.ridge$cvm)
+mse.ridge
+```
+
+Part D
+
+```{r}
+x <- model.matrix(Apps ~ ., college.data)[, -1]
+y <- college.data$Apps
+
+cv.lasso <- cv.glmnet(x, y, alpha = 1)
+
+plot(cv.lasso)
+
+best.lambda <- cv.lasso$lambda.min
+best.lambda
+
+min_mse <- min(cv.lasso$cvm)
+min_mse
+```
