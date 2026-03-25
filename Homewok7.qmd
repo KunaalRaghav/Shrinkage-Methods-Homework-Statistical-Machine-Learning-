@@ -11,6 +11,7 @@ The following r chunk includes the packages we will use for homework assignment
 
 ```{r}
 library(ISLR2)
+library(car)
 ```
 
 ## College Applications
@@ -35,11 +36,18 @@ college.data <- my.college[Z, ]
 holdout.data <- my.college[-Z, ]
 ```
 
-You can add options to executable code like this
+Part A
 
 ```{r}
-#| echo: false
-2 * 2
+
+
+# Fit full model
+fit_full <- lm(Outstate ~ ., data = college.data)
+
+# Compute VIF
+vif_values <- vif(fit_full)
+vif_values
+
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+Several of the coefficients, such as Apps, Accept, Enroll, and PHD seem to have high colliniarity
